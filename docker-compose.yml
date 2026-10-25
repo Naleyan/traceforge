@@ -1,0 +1,47 @@
+services:
+  product:
+    build: ./services/product
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  order:
+    build: ./services/order
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  payment:
+    build: ./services/payment
+    ports:
+      - "8003:8003"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+
+  gateway:
+    build: ./services/gateway
+    ports:
+      - "8000:8000"
+    environment:
+      PRODUCT_URL: http://product:8001
+      ORDER_URL: http://order:8002
+      PAYMENT_URL: http://payment:8003
+      HTTP_TIMEOUT_SECONDS: "2.0"
+    depends_on:
+      product:
+        condition: service_healthy
+      order:
+        condition: service_healthy
+      payment:
+        condition: service_healthy
