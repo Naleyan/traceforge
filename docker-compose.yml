@@ -113,3 +113,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+
+  k6:
+    image: grafana/k6:latest
+    profiles: ["loadtest"]
+    volumes:
+      - ./loadtests:/scripts:ro
+    environment:
+      BASE_URL: http://gateway:8000
+    depends_on:
+      - gateway
