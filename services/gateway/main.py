@@ -3,6 +3,7 @@ import os
 import httpx
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from observability import setup_logging
 
 # Configuration
 PRODUCT_URL = os.getenv("PRODUCT_URL", "http://localhost:8001")
@@ -11,6 +12,7 @@ PAYMENT_URL = os.getenv("PAYMENT_URL", "http://localhost:8003")
 TIMEOUT = httpx.Timeout(float(os.getenv("HTTP_TIMEOUT_SECONDS", "2.0")))
 
 app = FastAPI(title="API Gateway")
+logger = setup_logging(app)
 
 
 class OrderRequest(BaseModel):
@@ -18,16 +20,32 @@ class OrderRequest(BaseModel):
     quantity: int = Field(gt=0)
 
 
-# Outils 
 async def call_service(method: str, url: str, service: str, json: dict | None = None):
     """Appelle un service et transforme les problèmes réseau en erreurs HTTP claires."""
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            return await client.request(method, url, json=json)
+            response = await client.request(method, url, json=json)
     except httpx.TimeoutException:
+        logger.error(
+            f"{service} service timed out",
+            extra={"fields": {"target_service": service.lower(), "error.kind": "timeout", "url": url}},
+        )
         raise HTTPException(status_code=504, detail=f"{service} service timed out")
-    except httpx.RequestError:
+    except httpx.RequestError as exc:
+        logger.error(
+            f"{service} service unreachable",
+            extra={"fields": {"target_service": service.lower(), "error.kind": "unreachable",
+                              "url": url, "error.message": str(exc)}},
+        )
         raise HTTPException(status_code=502, detail=f"{service} service unreachable")
+
+    if response.status_code >= 500:
+        logger.error(
+            f"{service} service returned {response.status_code}",
+            extra={"fields": {"target_service": service.lower(), "error.kind": "upstream_5xx",
+                              "url": url, "upstream_status": response.status_code}},
+        )
+    return response
 
 
 async def set_order_status(order_id: str, status: str) -> dict:
@@ -95,4 +113,9 @@ async def create_order(request: OrderRequest):
         raise HTTPException(status_code=502, detail="Payment service error")
 
     # 4. Confirmer la commande
-    return await set_order_status(order["id"], "paid")
+    order = await set_order_status(order["id"], "paid")
+    logger.info(
+        "Order paid",
+        extra={"fields": {"order_id": order["id"], "product_id": request.product_id, "amount": amount}},
+    )
+    return order

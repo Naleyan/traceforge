@@ -3,8 +3,11 @@ from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from observability import setup_logging          
 
 app = FastAPI(title="Order Service")
+setup_logging(app)
+
 
 ORDERS: dict[str, dict] = {}
 

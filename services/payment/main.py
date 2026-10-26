@@ -2,9 +2,10 @@ import uuid
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
+from observability import setup_logging          
 
 app = FastAPI(title="Payment Service")
-
+setup_logging(app)
 
 class PaymentRequest(BaseModel):
     order_id: str

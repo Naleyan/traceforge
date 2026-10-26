@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
+from observability import setup_logging          
 
 app = FastAPI(title="Product Service")
+setup_logging(app)
 
 #Création du faux catalogue
 PRODUCTS = {

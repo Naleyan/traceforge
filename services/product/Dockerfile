@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 4. Copier le code
-COPY main.py .
+COPY main.py observability.py ./
 
 # 5. Commande lancée au démarrage du conteneur
-CMD ["ddtrace-run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["ddtrace-run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--no-access-log"]

@@ -8,6 +8,7 @@ services:
       DD_ENV: dev
       DD_VERSION: "0.1.0"
       DD_AGENT_HOST: datadog-agent
+      DD_LOGS_INJECTION: "true"
     labels:
       com.datadoghq.tags.service: product
       com.datadoghq.tags.env: dev
@@ -30,6 +31,7 @@ services:
       DD_ENV: dev
       DD_VERSION: "0.1.0"
       DD_AGENT_HOST: datadog-agent
+      DD_LOGS_INJECTION: "true"
     labels:
       com.datadoghq.tags.service: order
       com.datadoghq.tags.env: dev
@@ -52,6 +54,8 @@ services:
       DD_ENV: dev
       DD_VERSION: "0.1.0"
       DD_AGENT_HOST: datadog-agent
+      DD_LOGS_INJECTION: "true"
+
     labels:
       com.datadoghq.tags.service: payment
       com.datadoghq.tags.env: dev
@@ -78,6 +82,7 @@ services:
       DD_ENV: dev
       DD_VERSION: "0.1.0"
       DD_AGENT_HOST: datadog-agent
+      DD_LOGS_INJECTION: "true"
     labels:
       com.datadoghq.tags.service: gateway
       com.datadoghq.tags.env: dev
