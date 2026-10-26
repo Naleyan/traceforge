@@ -22,6 +22,20 @@ Then open http://localhost:8000/docs and call `POST /orders` with:
 ```json
 {"product_id": "p1", "quantity": 2}
 ```
+## Tests
+
+Each service has its own test suite. Example for the gateway:
+
+```bash
+pip install -r services/gateway/requirements-dev.txt
+cd services/gateway
+python -m pytest -v
+```
+
+Gateway tests use [respx](https://lundberg.github.io/respx/) to mock downstream services,
+including timeouts, unreachable services and 5xx errors.
+
+CI (GitHub Actions) runs all test suites and builds the Docker images on every push.
 
 ## Known limitations
 
