@@ -1,6 +1,8 @@
 services:
   product:
     build: ./services/product
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "product"}]'
     ports:
       - "8001:8001"
     healthcheck:
@@ -11,6 +13,8 @@ services:
 
   order:
     build: ./services/order
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "order"}]'
     ports:
       - "8002:8002"
     healthcheck:
@@ -21,6 +25,8 @@ services:
 
   payment:
     build: ./services/payment
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "payment"}]'
     ports:
       - "8003:8003"
     healthcheck:
@@ -31,6 +37,8 @@ services:
 
   gateway:
     build: ./services/gateway
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "gateway"}]'
     ports:
       - "8000:8000"
     environment:
@@ -45,3 +53,19 @@ services:
         condition: service_healthy
       payment:
         condition: service_healthy
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_SITE: ${DD_SITE}
+      DD_HOSTNAME: traceforge-local
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_LOGS_ENABLED: "true"
+      DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL: "true"
+      DD_CONTAINER_EXCLUDE_LOGS: "name:datadog-agent"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
