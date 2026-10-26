@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 
 # 5. Commande lancée au démarrage du conteneur
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["ddtrace-run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

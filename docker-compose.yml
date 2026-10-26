@@ -1,10 +1,20 @@
 services:
   product:
     build: ./services/product
-    labels:
-      com.datadoghq.ad.logs: '[{"source": "python", "service": "product"}]'
     ports:
       - "8001:8001"
+    environment:
+      DD_SERVICE: product
+      DD_ENV: dev
+      DD_VERSION: "0.1.0"
+      DD_AGENT_HOST: datadog-agent
+    labels:
+      com.datadoghq.tags.service: product
+      com.datadoghq.tags.env: dev
+      com.datadoghq.tags.version: "0.1.0"
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "product"}]'
+    depends_on:
+      - datadog-agent
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 5s
@@ -13,10 +23,20 @@ services:
 
   order:
     build: ./services/order
-    labels:
-      com.datadoghq.ad.logs: '[{"source": "python", "service": "order"}]'
     ports:
       - "8002:8002"
+    environment:
+      DD_SERVICE: order
+      DD_ENV: dev
+      DD_VERSION: "0.1.0"
+      DD_AGENT_HOST: datadog-agent
+    labels:
+      com.datadoghq.tags.service: order
+      com.datadoghq.tags.env: dev
+      com.datadoghq.tags.version: "0.1.0"
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "order"}]'
+    depends_on:
+      - datadog-agent
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
       interval: 5s
@@ -25,10 +45,20 @@ services:
 
   payment:
     build: ./services/payment
-    labels:
-      com.datadoghq.ad.logs: '[{"source": "python", "service": "payment"}]'
     ports:
       - "8003:8003"
+    environment:
+      DD_SERVICE: payment
+      DD_ENV: dev
+      DD_VERSION: "0.1.0"
+      DD_AGENT_HOST: datadog-agent
+    labels:
+      com.datadoghq.tags.service: payment
+      com.datadoghq.tags.env: dev
+      com.datadoghq.tags.version: "0.1.0"
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "payment"}]'
+    depends_on:
+      - datadog-agent
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
       interval: 5s
@@ -37,8 +67,6 @@ services:
 
   gateway:
     build: ./services/gateway
-    labels:
-      com.datadoghq.ad.logs: '[{"source": "python", "service": "gateway"}]'
     ports:
       - "8000:8000"
     environment:
@@ -46,7 +74,18 @@ services:
       ORDER_URL: http://order:8002
       PAYMENT_URL: http://payment:8003
       HTTP_TIMEOUT_SECONDS: "2.0"
+      DD_SERVICE: gateway
+      DD_ENV: dev
+      DD_VERSION: "0.1.0"
+      DD_AGENT_HOST: datadog-agent
+    labels:
+      com.datadoghq.tags.service: gateway
+      com.datadoghq.tags.env: dev
+      com.datadoghq.tags.version: "0.1.0"
+      com.datadoghq.ad.logs: '[{"source": "python", "service": "gateway"}]'
     depends_on:
+      datadog-agent:
+        condition: service_started
       product:
         condition: service_healthy
       order:
